@@ -1,0 +1,14 @@
+	    TTransaction::open('samples');
+
+            // Procura o "Customer" de id indicado abaixo
+            $customer = Customer::find(31);
+
+            
+            if ($customer) 
+            { 
+                $customer->phone = '51 8111-3333'; // Muda o valor do telefone do "Customer" de id selecionado acima
+                $customer->store(); // Envia o dado alterado para o banco
+            } 
+
+            new TMessage('info', 'Object updated'); 
+            TTransaction::close(); // Confirma o suscesso da alteração e fecha a conexão com o banco 

@@ -1,0 +1,52 @@
+$criteria = new TCriteria;
+$criteria->add(new TFilter('age', '<', 16), TExpression::OR_OPERATOR); 
+$criteria->add(new TFilter('age', '>', 60), TExpression::OR_OPERATOR); 
+echo $criteria->dump(); // Buscando dados no qual a "age"(idade) seja MENOR que 16 OU (TExpression::OR_OPERATOR) MAIOR que 60
+
+$criteria = new TCriteria;
+$criteria->add(new TFilter('age', 'BETWEEN', 16, 60));
+echo $criteria->dump(); // "age" ENTRE(BETWEEN) 16 e 60 anos
+
+$criteria = new TCriteria;
+$criteria->add(new TFilter('age','IN',     array(24,25,26))); 
+$criteria->add(new TFilter('age','NOT IN', array(10))); 
+echo $criteria->dump(); // Quando a "age" estiver com o valor de "24, 25 e 26" E quando ele não esiver com o valor "10"
+
+$criteria = new TCriteria;
+$criteria->add(new TFilter('nome', 'like', 'pedro%'), TExpression::OR_OPERATOR); 
+$criteria->add(new TFilter('nome', 'like', 'maria%'), TExpression::OR_OPERATOR); 
+echo $criteria->dump(); // Quando o nome tiver "maria" OU "pedro"
+
+$criteria = new TCriteria;
+$criteria->add(new TFilter('cellphone', 'IS NOT', NULL)); 
+$criteria->add(new TFilter('gender',   '=',      'F')); 
+echo $criteria->dump(); // Quando o "cellphone"(telefone celular) NÃO ESTIVER NULO (no caso, vai puxar quem tem telefone cadastrado) E se o "gender"(gênero) da pessoa for "F"(Feminino)
+ 
+$criteria = new TCriteria;
+$criteria->add(new TFilter('state', 'IN',     array('RS', 'SC', 'PR'))); 
+$criteria->add(new TFilter('state', 'NOT IN', array('AC', 'PI'))); 
+echo $criteria->dump(); // (state IN ('RS','SC','PR') AND state NOT IN ('AC','PI'))
+
+// subselect
+$criteria = new TCriteria;
+$criteria->add(new TFilter('id', 'IN', '(SELECT customer_id FROM purchases)'));
+echo $criteria->dump(); // Quando o id de uma tabela estiver IGUAL ao "customer_id" (id do cliente) da tabela "purchases" (compras)
+
+// no escape strings
+$criteria = new TCriteria;
+$criteria->add(new TFilter('birthdate', '<=', "NOESC:date(now()) - '2 years'::interval"));
+echo $criteria->dump(); // Quando o "birthdate" (data de nascimento) tiver a "date"(data) comparando a data de "now()"(Agora) com a de 2 anos de intervalo
+
+// composed criteria
+$criteria1 = new TCriteria;
+$criteria1->add(new TFilter('gender',  '= ', 'F')); 
+$criteria1->add(new TFilter('age',   '>', '18')); 
+
+$criteria2 = new TCriteria; 
+$criteria2->add(new TFilter('gender',  '= ', 'M')); 
+$criteria2->add(new TFilter('age', '<', '16')); 
+
+$criteria = new TCriteria;     
+$criteria->add($criteria1, TExpression::OR_OPERATOR); 
+$criteria->add($criteria2, TExpression::OR_OPERATOR); 
+echo $criteria->dump(); // Quando o "gender" da pessoa for igual a "F" E tiver "age" maior que 18, E TAMBÉM, quando o "gender" for "M" (masculino) E a "age" for menor que 16, depois junta os 2 critérios num só e procura.

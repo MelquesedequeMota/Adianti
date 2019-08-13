@@ -1,0 +1,13 @@
+	    TTransaction::open('samples');
+            
+            $product = Product::find(4);
+            
+            // Já seleciona o que tá dentro do banco  do "Product" de id indicado acima e cria uma mensagem com esses valores
+            echo $product->render('The product <b>{id}</b> is <u>{description}</u>');
+            
+            echo '<br>';
+            
+            // evaluate() é uma função que faz calculos, e está sendo usado para calcular o estoque com o preço de venda do produto selecionado acima
+            echo $product->evaluate('= {sale_price} * {stock}');
+            
+            TTransaction::close();

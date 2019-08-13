@@ -1,0 +1,50 @@
+	    TTransaction::open('samples');
+            
+            // Definindo os critérios
+            $criteria = new TCriteria; 
+            $criteria->add(new TFilter('gender', '=', 'F')); 
+            $criteria->add(new TFilter('status', '=', 'M')); 
+            
+            // Puxar os dados em forma de Repositório
+            $repository = new TRepository('Customer'); 
+            $customers = $repository->load($criteria); // Está puxando os registros do banco que tiverem os critérios estabelecidos logo acima neste código
+            
+            foreach ($customers as $customer) 
+            { 
+                echo $customer->id . ' - ' . $customer->name . '<br>'; // Imprimindo os dados dos "customers" que tiveram os critérios requisitados
+            }
+            
+
+
+
+
+	    TTransaction::open('samples');
+            
+            // Puxa os "Customers" de acordo com as requisições indicadas
+            $customers = Customer::where('gender', '=', 'M')
+                                 ->where('name', 'like', 'A%')
+                                 ->load();
+                                 
+            foreach ($customers as $customer)
+            {
+                echo $customer->id . ' - ' .
+                     $customer->name . ' - ' . 
+                     $customer->address . '<br>'; // Imprimindo os dados dos "customers" que tiveram os critérios requisitados
+            }
+
+            TTransaction::close(); // fecha a transação.
+
+
+
+	    Transaction::open('samples');
+            $criteria = new TCriteria;
+            $criteria->add( new TFilter( 'gender', '=', 'M' ));
+            $criteria->add( new TFilter( 'name', 'like', 'A%' ));
+            
+            $customers = Customer::getObjects($criteria); // Puxa os "Customers" de acordo com as requisições indicadas
+            
+            foreach ($customers as $customer)
+            {
+                echo $customer->id . ' - ' . $customer->name . '<br>'; // Imprimindo os dados dos "customers" que tiveram os critérios requisitados
+            }
+            TTransaction::close();

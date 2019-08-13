@@ -1,0 +1,23 @@
+	    TTransaction::open('samples'); 
+            $criteria = new TCriteria; 
+            $criteria->add(new TFilter('address', 'like', 'Rua Porto%')); 
+            $criteria->add(new TFilter('gender',  '=', 'M')); 
+            $repository = new TRepository('Customer'); 
+            $repository->delete($criteria); // Cria um repositório de "Customer" e filtra todo mundo que tiver o "adress" que começa com "Rua Porto" e quem 	    tiver o "gender" IGUAL A "m" e deleta somente estes registros
+            
+            new TMessage('info', 'Records Deleted'); 
+            TTransaction::close();
+
+
+
+
+	    TTransaction::open('samples');
+            
+	    // // Puxa os registros de "Customer" e filtra todo mundo que tiver o "adress" que começa com "Rua Porto" e quem 	    tiver o "gender" IGUAL A "m" e deleta somente estes registros
+
+            Customer::where('address', 'like', 'Rua Porto%')
+                        ->where('gender',  '=', 'M')
+                        ->delete();
+            
+            new TMessage('info', 'Records Deleted'); 
+            TTransaction::close();

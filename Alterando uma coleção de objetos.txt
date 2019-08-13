@@ -1,0 +1,14 @@
+	    TTransaction::open('samples');
+            
+            // Puxa os "Customers" do banco que tiverem essas requisições
+            $customers = Customer::where('city_id', '=', '4')->load();
+            
+            foreach ($customers as $customer) 
+            {
+                // Atualiza o telefone de todos os "customers" que foram puxados, adicionando o "84" no número junto com os três primeiros dígitos do número 	    que estava anteriormente gravado em cada um deles
+
+                $customer->phone = '84 '.substr($customer->phone, 3); 
+                $customer->store(); 
+            } 
+            new TMessage('info', 'Records updated'); 
+            TTransaction::close(); 

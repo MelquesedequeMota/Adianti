@@ -1,0 +1,705 @@
+									Sem Bootstrap
+
+<?php
+/**
+ * FormCustomView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormCustomView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // Cria um formulário
+        $this->form = new TForm('customform');
+        
+        // Cria o notebook (Vai fazer a divisão de Page1 para Page2)
+        $notebook = new BootstrapNotebookWrapper(new TNotebook);
+        $this->form->add($notebook);
+        
+        // Cria as tabelinhas que a gente vai guardar os formulários
+        $table1 = new TTable;
+        $table2 = new TTable;
+        
+        $table1->width = '100%';
+        $table2->width = '100%';
+        
+        $table1->style = 'padding: 10px';
+        $table2->style = 'padding: 10px';
+        
+        // Cria as duas páginas dentro do notebook
+        $notebook->appendPage('Page 1', $table1);
+        $notebook->appendPage('Page 2', $table2);
+        
+        // Cria os Inputs do formulário
+        $field1  = new TEntry('field1');  // Input type="text" padrão
+        $field2  = new TEntry('field2');  // Input type="text" padrão
+        $field3  = new TDate('field3');   // Input type="date" padrão
+        $field4  = new TCombo('field4');  // <select></select> padrão
+        $field5  = new TText('field5');   // <textfield></textfield> padrão
+
+        //Define o tamanho de todos os Inputs
+        $field1->setSize('30%');
+        $field2->setSize('100%');
+        $field3->setSize('100%');
+        $field4->setSize('100%');
+        $field5->setSize('100%', 70);
+
+        // Adiciona os itens no Select
+        $items = [ 'a' => 'Item a', 'b' => 'Item b', 'c' => 'Item c' ];
+        $field4->addItems($items);
+        
+        // Adiciona os espaços nas tabelas (os 4 primeiros na tabela 1 e o ultimo na tabela 2)
+        $table1->addRowSet( new TLabel('Field 1'), $field1 );
+        $table1->addRowSet( new TLabel('Field 2'), $field2 );
+        $table1->addRowSet( new TLabel('Field 3'), $field3 );
+        $table1->addRowSet( new TLabel('Field 4'), $field4 );
+        
+        $table2->addRowSet( new TLabel('Field 5') );
+        $table2->addRowSet( $field5 );
+        
+        // Cria o botão Action, tipo o Submit, e roda a função de onSend
+        $button = new TButton('action1');
+        $button->setAction(new TAction(array($this, 'onSend')), 'Send');
+        $button->setImage('fa:check-circle-o green');
+        
+        // Diz o que que vai ficar dentro do mesmo form com o setFields
+        $this->form->setFields([$field1, $field2, $field3, $field4, $field5, $button]);
+
+        // Adiciona o Footer onde vai ficar o botão de enviar (Footer é a parte de baixo do site que não muda)
+        $panel = new TPanelGroup(_t('Manual form'));
+        $panel->add($this->form);
+        $panel->addFooter($button);
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($panel);
+        
+        parent::add($vbox);
+    }
+    
+    /**
+     * Pega os dados de quando vc clica no botão de enviar
+     */
+    public function onSend($param)
+    {
+        $data = $this->form->getData();
+        $this->form->setData($data);
+        
+        new TMessage('info', str_replace(',', '<br>', json_encode($data)));
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+									Com Bootstrap
+
+<?php
+/**
+ * FormBuilderView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormBuilderView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // Cria um formulário do jeito do bootstrap, não um normalmente, depois diz o título do formulário
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle(_t('Bootstrap form'));
+        
+        // Cria os campos do formulário
+        $id          = new TEntry('id'); // Input type="text" padrão
+        $description = new TEntry('description'); // Input type="text" padrão
+        $password    = new TPassword('password'); // Input type="password" padrão
+        $created     = new TDateTime('created'); // Input para definir tanto o dia quanto a hora
+        $expires     = new TDate('expires'); // Input type="date" padrão
+        $value       = new TEntry('value'); // Input type="text" padrão
+        $color       = new TColor('color'); // Input para pegar a cor
+        $weight      = new TSpinner('weight'); // Input que ao clicar nas setas, adiciona 0.01 unidades (ao segurar o contador acelera infinitamente de acordo com o tempo)
+        $type        = new TCombo('type'); // Input <select></select> padrão
+        $text        = new TText('text'); // Input <textfield></textfield> padrão
+        
+        $id->setEditable(FALSE); // Diz que o input do id não pode ser editavel
+        $created->setMask('dd/mm/yyyy hh:ii'); // Cria uma máscara para o input da data/hora
+        $expires->setMask('dd/mm/yyyy'); // Cria uma máscara para o input da data
+        $created->setDatabaseMask('yyyy-mm-dd hh:ii'); // Cria uma máscara para o banco da data/hora
+        $expires->setDatabaseMask('yyyy-mm-dd'); // Cria uma máscara para o input da data
+        $value->setNumericMask(2, ',', '.', true); // Cria uma máscara para que o programa automaticamente coloque vírgula e ponto quando o usuário digitar
+        $value->setSize('100%'); // Define tamanho do input
+        $color->setSize('100%'); // Define tamanho do input
+        $created->setSize('100%'); // Define tamanho do input
+        $expires->setSize('100%'); // Define tamanho do input
+        $weight->setRange(1,100,0.1); // Define os limites da input de peso (Onde começa -> o limite máximo -> quanto vai aumentar a cada clique nas setinhas na lateral)
+        $weight->setSize('100%'); // Define tamanho do input
+        $type->setSize('100%'); // Define tamanho do input
+        $type->addItems( ['a' => 'Type a', 'b' => 'Type b', 'c' => 'Type c'] ); //Adiciona os itens ao Combo
+        
+        $created->setValue( date('Y-m-d H:i') ); // Adiciona o valor padrão como a data e hora de hoje
+        $expires->setValue( date('Y-m-d', strtotime("+1 days")) ); // Adiciona o valor padrão como a data e hora de hoje com 1 dia de andiantamento
+        $value->setValue(123.45); // Adiciona o valor padrão de início
+        $weight->setValue(30); // Adiciona o valor padrão de início
+        $color->setValue('#FF0000'); // Adiciona o valor padrão de início
+        $type->setValue('a'); // Adiciona o valor padrão de início
+        
+        // Adiciona os campos ao formulário (pode ser feita de 1 em 1 ou de várias de uma vez)
+        $this->form->addFields( [new TLabel('Id')],          [$id]);
+        $this->form->addFields( [new TLabel('Description')], [$description] );
+        $this->form->addFields( [new TLabel('Password')],    [$password] );
+        $this->form->addFields( [new TLabel('Created at')],  [$created], 
+                                [new TLabel('Expires at')],  [$expires]);
+        $this->form->addFields( [new TLabel('Value')],       [$value],
+                                [new TLabel('Color')],       [$color]);
+        $this->form->addFields( [new TLabel('Weight')],      [$weight],
+                                [new TLabel('Type')],        [$type]);
+        
+        $description->placeholder = 'Description placeholder'; // PLaceholder da descrição
+        $description->setTip('Tip for description'); // Dá uma dica do que botar quando passamos o mouse em cima
+        
+        $label = new TLabel('Division', '#7D78B6', 12, 'bi'); // Cria uma nova tabela (Nome: Division -> Cor do texto -> Tamanho da fonte: 12 -> Atributos do texto (B: bold e I: italic))
+        $label->style='text-align:left;border-bottom:1px solid #c0c0c0;width:100%';
+        $this->form->addContent( [$label] );
+        
+        $this->form->addFields( [new TLabel('Description')], [$text] );
+        $text->setSize('100%', 50);
+        
+        // Define a ação do botão de Enviar
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green');
+        $this->form->addHeaderAction('Send', new TAction(array($this, 'onSend')), 'fa:rocket orange');
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Simulates an save button
+     * Show the form content
+     */
+    public function onSend($param)
+    {
+        // Define uma variavel pra guardar os dados que foram preenchidos do formulário e bota de volta depois
+        $data = $this->form->getData();
+        
+        
+        $this->form->setData($data);
+        
+        // Cria a variável "message" pra guardar todas as informações que a gente mandou do formulário
+        $message = 'Id: '           . $data->id . '<br>';
+        $message.= 'Description : ' . $data->description . '<br>';
+        $message.= 'Password : '    . $data->password . '<br>';
+        $message.= 'Created: '      . $data->created . '<br>';
+        $message.= 'Expires: '      . $data->expires . '<br>';
+        $message.= 'Value : '       . $data->value . '<br>';
+        $message.= 'Color : '       . $data->color . '<br>';
+        $message.= 'Weight : '      . $data->weight . '<br>';
+        $message.= 'Type : '        . $data->type . '<br>';
+        $message.= 'Text : '        . $data->text . '<br>';
+        
+        // Mostra a mensagem que contem as informações
+        new TMessage('info', $message);
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+									Forma Vertical
+
+<?php
+/**
+ * FormVerticalBuilderView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormVerticalBuilderView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        // Cria o formulário com bootstrap
+        $this->form = new BootstrapFormBuilder('form_builder');
+        $this->form->setFormTitle(_t('Bootstrap vertical form'));
+        $this->form->setFieldSizes('100%');
+        // Cria a aba de 'Basic'
+        $this->form->appendPage('Basic');
+        
+        $code         = new TEntry('code'); // Input type="text" padrão
+        $name         = new TEntry('name'); // Input type="text" padrão
+        $doc          = new TEntry('doc'); // Input type="text" padrão
+        $gender       = new TCombo('gender'); // Input <select></select> padrão
+        $driver       = new TEntry('driver'); // Input type="text" padrão
+        $birthdate    = new TDate('birthdate'); // Input type="date" padrão
+        $status       = new TCombo('status'); // Input <select></select> padrão
+        $homephone    = new TEntry('homephone'); // Input type="text" padrão
+        $cellphone    = new TEntry('cellphone'); // Input type="text" padrão
+        $street       = new TEntry('street'); // Input type="text" padrão
+        $number       = new TEntry('number'); // Input type="text" padrão
+        $neighborhood = new TEntry('neighborhood'); // Input type="text" padrão
+        $city         = new TDBUniqueSearch('city', 'samples', 'City', 'id', 'name'); //Input que procura um dado que já existe
+        $state        = new TCombo('state'); // Input <select></select> padrão
+        $postal       = new TEntry('postal'); // Input type="text" padrão
+        
+        $city->setMinLength(1); // Defino o tamanho mínimo do "city" para que ele procure as cidades registradas previamente
+        $city->setMask('({id}) <b>{name}</b> - {state->name}'); // Máscara para a procura
+        $status->addItems( ['S' => 'Single', 'C' => 'Commited'] ); // Itens do Combo
+        $gender->addItems( ['F' => 'Female', 'M' => 'Male'] ); // Itens do Combo
+        $state->addItems(['AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona',
+                          'CA' => 'California', 'CO' => 'Colorado']); // Itens do Combo
+        $postal->setMask('99.999-999', true);
+        $doc->setMask('999.999.999-99');
+        $birthdate->setMask('dd/mm/yyyy');
+        $homephone->setMask('(99)9999-99999');
+        $cellphone->setMask('(99)9999-99999');
+        $birthdate->setDatabaseMask('yyyy-mm-dd');
+        $state->enableSearch(); // Permite que neste combo 'state' tenha uma caixa para a gente procurar um nome específico, caso tenha muitas opções pra não procurar uma por uma
+        
+        $row = $this->form->addFields( [ new TLabel('Code'),     $code ],
+                                       [ new TLabel('Name'),     $name ],
+                                       [ new TLabel('Gender'),   $gender ],
+                                       [ new TLabel('Status'),   $status ] );
+        $row->layout = ['col-sm-2', 'col-sm-6', 'col-sm-2', 'col-sm-2' ]; // Define os inputs que vão ficar dentro dessa linha e depois define as configurações de posição no html
+        
+        $row = $this->form->addFields( [ new TLabel('Driver lic.'),  $driver ],
+                                       [ new TLabel('Document'),     $doc ],
+                                       [ new TLabel('Birthdate'),    $birthdate ],
+                                       [ new TLabel('Home phone'),   $homephone ],
+                                       [ new TLabel('Cell phone'),   $cellphone ]);
+        $row->layout = ['col-sm-2', 'col-sm-3', 'col-sm-3', 'col-sm-2', 'col-sm-2' ]; // Define os inputs que vão ficar dentro dessa linha e depois define as configurações de posição no html
+        
+        
+        $label2 = new TLabel('Address', '#5A73DB', 12, '');
+        $label2->style='text-align:left;border-bottom:1px solid #c0c0c0;width:100%';
+        $this->form->addContent( [$label2] ); // Cria uma nova tabela com o título, cor, tamanho da fonte e posicioa ela na páina html
+        
+        $row = $this->form->addFields( [ new TLabel('Street.'),      $street ],
+                                       [ new TLabel('Number'),       $number ],
+                                       [ new TLabel('Neighborhood'), $neighborhood ] );
+        $row->layout = ['col-sm-6', 'col-sm-2', 'col-sm-4' ]; //  // Define os inputs que vão ficar dentro dessa linha e depois define as configurações de posição no html
+        
+        $row = $this->form->addFields( [ new TLabel('City.'),  $city ],
+                                       [ new TLabel('State'),  $state ],
+                                       [ new TLabel('Postal'), $postal ] );
+        $row->layout = ['col-sm-6', 'col-sm-3', 'col-sm-3' ];  // Define os inputs que vão ficar dentro dessa linha e depois define as configurações de posição no html
+        
+        
+        $this->form->appendPage('Other data'); // Cria outra aba na página (A partir daqui ele cria a linha JUNTAMENTE com o input, diferente dos códigos até agora) OBS: A partir da criação dessa aba, tudo aqui debaixo vai ir pra essa página neste código 
+        $row = $this->form->addFields( [ new TLabel('Test1'), $t1 = new TEntry('test1') ],
+                                       [ new TLabel('Test2'), $t2 = new TEntry('test2') ] );
+        $row->layout = ['col-sm-4', 'col-sm-8' ]; // Define os inputs que vão ficar dentro dessa linha e depois define as configurações de posição no html
+        
+        $row = $this->form->addFields( [ new TLabel('Test3'), $text = new TText('text') ] );
+        $row->layout = ['col-sm-12' ]; // Define os inputs que vão ficar dentro dessa linha e depois define as configurações de posição no html
+        
+        
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green'); // Define a função que o botão de Enviar vai ter
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Post data
+     */
+    public function onSend($param)
+    {
+        // Define uma variavel pra guardar os dados que foram preenchidos do formulário e bota de volta depois
+        $data = $this->form->getData();
+        $this->form->setData($data);
+        
+        echo '<pre>';
+        print_r($data);
+        echo '</pre>';
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+									Forma em Colunas
+
+<?php
+/**
+ * FormBuilderGridView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormBuilderGridView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        // Cria o formulário com bootstrap
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle(_t('Bootstrap form grid'));
+        
+        $this->form->appendPage('Automatic form grid'); // Cria uma aba (O automatic vai ser o próprio adianti que vai organizar)
+        
+        // Cria uma nova label e ajeita automaticamente de acordo com o adianti (label é uma e o resto é pra completar a quantiade escrita no label) 
+        $this->form->addFields( [ new TLabel('2 slots') ], 
+                                [ new TEntry('field_1') ] ); 
+        
+        $this->form->addFields( [ new TLabel('3 slots') ],
+                                [ new TEntry('field_2') ],
+                                [ new TEntry('field_3') ] );
+                                
+        $this->form->addFields( [ new TLabel('4 slots') ],
+                                [ new TEntry('field_4') ],
+                                [ new TEntry('field_5') ],
+                                [ new TEntry('field_6') ] );
+                                
+        $this->form->addFields( [ new TLabel('5 slots') ],
+                                [ new TEntry('field_7') ],
+                                [ new TEntry('field_8') ],
+                                [ new TEntry('field_9') ],
+                                [ new TEntry('field_10') ] );
+                                
+        $this->form->addFields( [ new TLabel('6 slots') ],
+                                [ new TEntry('field_11') ],
+                                [ new TEntry('field_12') ],
+                                [ new TEntry('field_13') ],
+                                [ new TEntry('field_14') ],
+                                [ new TEntry('field_15') ] );
+                                
+        $this->form->appendPage('Manual form grid'); // Cria uma aba (O Manual vai ser como a gente vai programar, definindo o tamanho dos inputs e o espaçamento entre eles)
+        
+        // Cria uma nova label que a gente vai definir manualmente os detalhes dela.
+        $row = $this->form->addFields( [ new TLabel('Custom 1') ],
+                                       [ new TEntry('field_16') ],
+                                       [ new TEntry('field_17') ],
+                                       [ new TEntry('field_18') ] );
+        $row->layout = ['col-sm-2 control-label', 'col-sm-4', 'col-sm-4', 'col-sm-2' ];
+        
+        $row = $this->form->addFields( [ new TLabel('Custom 2') ],
+                                       [ new TEntry('field_19') ],
+                                       [ new TEntry('field_20') ],
+                                       [ new TEntry('field_21') ] );
+        $row->layout = ['col-sm-2 control-label', 'col-sm-2', 'col-sm-6', 'col-sm-2' ];
+        
+        $row = $this->form->addFields( [ new TLabel('Custom 3') ],
+                                       [ new TEntry('field_22') ],
+                                       [ new TEntry('field_23') ],
+                                       [ new TEntry('field_24') ] );
+        $row->layout = ['col-sm-2 control-label', 'col-sm-2', 'col-sm-4', 'col-sm-4' ];
+        
+        $row = $this->form->addFields( [ new TLabel('Custom 4') ],
+                                       [ new TEntry('field_25') ],
+                                       [ new TEntry('field_26') ],
+                                       [ new TEntry('field_27') ],
+                                       [ new TEntry('field_28') ],
+                                       [ new TEntry('field_29') ],
+                                       [ new TEntry('field_30') ] );
+        $row->layout = ['col-sm-2 control-label', 'col-sm-2', 'col-sm-2', 'col-sm-2', 'col-sm-2', 'col-sm-1', 'col-sm-1' ];
+        
+        $row = $this->form->addFields( [ new TLabel('Custom 5') ],
+                                       [ new TEntry('field_31') ],
+                                       [ new TEntry('field_32') ],
+                                       [ new TEntry('field_33') ],
+                                       [ new TEntry('field_34') ],
+                                       [ new TEntry('field_35') ] );
+        $row->layout = ['col-sm-2 control-label', 'col-sm-1', 'col-sm-1', 'col-sm-1', 'col-sm-1', 'col-sm-6' ];
+        
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green'); // Define a ação do botão de Enviar
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Post data
+     */
+    public function onSend($param)
+    {
+        $data = $this->form->getData();
+        $this->form->setData($data);
+        
+        echo '<pre>';
+        print_r($data);
+        echo '</pre>';
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+								Formulário com post estático
+
+<?php
+/**
+ * FormStaticBuilderView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormStaticBuilderView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        // Cria o formulário com bootstrap
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle(_t('Form with static post'));
+        
+        // Cria os inputs
+        $id      = new TEntry('id');
+        $name    = new TEntry('name');
+        $address = new TEntry('address');
+        $date    = new TDate('date');
+        $obs     = new TText('obs');
+        
+        // Adiciona uma linha com 2 slots (label e input)
+        $this->form->addFields( [ new TLabel('Id') ],        [ $id ] );
+        $this->form->addFields( [ $lbl=new TLabel('Name') ], [ $name ] );
+        $this->form->addFields( [ new TLabel('Address') ],   [ $address ] );
+        $this->form->addFields( [ new TLabel('Date') ],      [ $date ] );
+        $this->form->addFields( [ new TLabel('Obs') ],       [ $obs ] );
+
+        // Características dos inputs
+        $lbl->setFontColor('red'); // Cria uma variavel para mudar a cor lá em cima na label
+        $id->setSize('30%');
+        $name->setSize('70%');
+        $address->setSize('70%');
+        $obs->setSize('70%');
+        
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green'); // Define a ação do  botão de enviar
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Static post data
+     */
+    public static function onSend($param)
+    {
+        try
+        {
+            if (empty($param['name'])) // Checa se o 'name' estier vazio
+            {
+                throw new Exception('Name cannot be empty');
+            }
+            
+            // show results
+            new TMessage('info', str_replace("\n", '<br> ', print_r($param, true)));
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+        }
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+								Formulário com funções diversas
+
+<?php
+/**
+ * FormMultiValuesView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormFieldListView extends TPage
+{
+    private $form;
+    private $fieldlist;
+    
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Cria um form
+        $this->form = new TForm('my_form');
+        
+        // Cria um combo com o índice e o registro
+        $combo = new TCombo('combo[]');
+        $combo->enableSearch();
+        $combo->addItems(['1'=>'One','2'=>'Two','3'=>'Three','4'=>'Four','5'=>'Five']);
+        $combo->setSize('100%');
+        
+        $text = new TEntry('text[]'); // Input texto normal
+        $text->setSize('100%');
+        
+        $number = new TEntry('number[]'); // Input texto com máscara automática
+        $number->setNumericMask(2,',','.', true);
+        $number->setSize('100%');
+        
+        $date = new TDate('date[]'); // Input date
+        $date->setSize('100%');
+        
+        $this->fieldlist = new TFieldList; // Cria a tabela principal onde vão ficar todas as linhas
+        $this->fieldlist->width = '100%';
+        $this->fieldlist->name  = 'my_field_list';
+        // Adiciona os campos (verticalmente de 1 por 1)
+        $this->fieldlist->addField( '<b>Combo</b>',  $combo,  ['width' => '25%'] );
+        $this->fieldlist->addField( '<b>Text</b>',   $text,   ['width' => '25%'] );
+        $this->fieldlist->addField( '<b>Number</b>', $number, ['width' => '25%'] );
+        $this->fieldlist->addField( '<b>Date</b>',   $date,   ['width' => '25%'] );
+        
+        $this->fieldlist->enableSorting();// Permite que cada linha da tabela possa ser movida
+        
+        // Adiciona os campos ao formulário que tão dentro do fieldset
+
+        $this->form->addField($combo);
+        $this->form->addField($text);
+        $this->form->addField($number);
+        $this->form->addField($date);
+        
+
+
+        $this->fieldlist->addHeader();
+        $this->fieldlist->addDetail( new stdClass );
+        $this->fieldlist->addDetail( new stdClass );
+        $this->fieldlist->addDetail( new stdClass );
+        $this->fieldlist->addDetail( new stdClass );
+        $this->fieldlist->addDetail( new stdClass );
+        $this->fieldlist->addCloneAction(); // ESTA LINHA disponibiliza a ação de conseguir criar uma nova linha daquela no formulário
+        
+        // Adiciona o 'fieldlist' dentro do formulário
+        $this->form->add($this->fieldlist);
+        
+        // Cria os 3 botões (salvar, limpar os dados e preenche-los)
+        $save  = TButton::create('save',  array($this, 'onSave'), 'Save', 'fa:save blue');
+        $clear = TButton::create('clear', array($this, 'onClear'), 'Clear', 'fa:eraser red');
+        $fill  = TButton::create('fill',  array($this, 'onFill'), 'Fill', 'fa:pencil green');
+        
+        // Adiciona os 3 botões dentro do Formulário
+
+        $this->form->addField($save);
+        $this->form->addField($clear);
+        $this->form->addField($fill);
+
+        // Cria a parte que irá ficar visível dentro da página
+        $panel = new TPanelGroup(_t('Form field list'));
+        $panel->add($this->form); // Adiciona o Formulário na parte visível
+        $panel->addFooter(THBox::pack($save, $clear, $fill)); // Adiciona um Footer(parte de baixo) com os 3 botões
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($panel);
+        parent::add($vbox);
+    }
+    
+    /**
+     * Função que vai Deletar todos os inputs e depois criar mais 4 de novo
+     */
+    public static function onClear($param)
+    {
+        TFieldList::clear('my_field_list');
+        TFieldList::addRows('my_field_list', 4);
+    }
+    
+    /**
+     * Função que vai preencher os espaços dos inputs de acordo com a quantidade de inputs restantes
+     */
+    public static function onFill($param)
+    {
+        $data = new stdClass;
+        $data->combo  = [ 1,2,3,4,5 ];
+        $data->text   = [ 'Part. One', 'Part. Two', 'Part. Three', 'Part. Four', 'Part. Five' ];
+        $data->number = [ '10,10','20,20', '30,30', '40,40', '50,50' ];
+        $data->date   = [ date('Y-m-d'),
+                          date('Y-m-d', strtotime("+1 days")),
+                          date('Y-m-d', strtotime("+2 days")),
+                          date('Y-m-d', strtotime("+3 days")),
+                          date('Y-m-d', strtotime("+4 days")) ];
+        TForm::sendData('my_form', $data);
+    }
+    
+    /**
+     * Função que vai salvar todos os dados que foram inseridos
+     */
+    public static function onSave($param)
+    {
+        // Vai mostrar todos os dados que inserimos dentro de uma janela que criamos na linha logo abaixo
+        $win = TWindow::create('test', 0.6, 0.8);
+        $win->add( '<pre>'.str_replace("\n", '<br>', print_r($param, true) ).'</pre>'  );
+        $win->show();
+    }
+}

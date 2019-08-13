@@ -1,0 +1,31 @@
+	    TTransaction::open('samples'); 
+
+            // Criando o repositório de "Customer" e adicionando os critérios 
+
+            $repos = new TRepository('Customer');
+            $criteria = new TCriteria;
+            $criteria->add(new TFilter('id', 'IN', [1,2,3,4]));
+            $criteria->add(new TFilter('status', '=', 'C')); 
+            
+            $values = array('gender' => 'F');
+            $repos->update($values, $criteria); // Dando um "update" para atualizar os dados dos registros que 	    foram puxados no repositório, fazendo com que estes agora possuam um "gender" = "F"
+                    
+            new TMessage('info', 'Records updated'); 
+            TTransaction::close();
+
+
+
+
+
+
+	    TTransaction::open('samples');
+
+	    // Dando um "update" para atualizar os dados dos registros que 	    foram puxados no repositório, 	    fazendo com que estes agora possuam um "gender" = "M"
+            
+            Customer::where('id', 'IN', [1,2,3,4])
+                    ->where('status', '=', 'C')
+                    ->set('gender', 'M')
+                    ->update();
+                    
+            new TMessage('info', 'Records updated'); 
+            TTransaction::close();

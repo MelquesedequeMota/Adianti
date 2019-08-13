@@ -1,0 +1,28 @@
+	    TTransaction::open('samples'); // abre o banco da tabela "samples"
+            
+            // Procura esse "Customer" no banco de dados (de acordo com o id parâmetro)
+            $customer = new Customer(4);
+            echo 'Name      : ' . $customer->name     . "<br>\n"; //	Puxa o name que ta dentro do "Customer" de id 4
+            echo 'Address   : ' . $customer->address  . "<br>\n";
+            echo "<br>\n";
+            
+            // Mesma coisa que o de cima
+            $customer = new Customer(25);
+            echo 'Name      : ' . $customer->name     . "<br>\n";
+            echo 'Address   : ' . $customer->address  . "<br>\n";
+            
+            TTransaction::close();
+
+
+
+
+
+	    // mesma coisa que o de cima, só que usando o método "find"
+ 	    $customer = Customer::find(4);
+            
+            if ($customer instanceof Customer)
+            {
+                echo 'Name      : ' . $customer->name     . "<br>\n";
+                echo 'Address   : ' . $customer->address  . "<br>\n";
+            }
+ 

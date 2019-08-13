@@ -1,0 +1,20 @@
+	    TTransaction::open('samples'); // Abre o banco
+            
+            // Está convertendo um "Customer" que já está cadastrado no banco em um array e imprimindo ele com o "print_r"
+            $customer = new Customer(4);
+            print_r($customer->toArray());
+            
+            // Cria o array "test[]" e vai adicionando os valores que serão inseridos no banco futuramente. (DETALHE: o nome dos espaços do array coincidem com os nomes dos atributos contidos na tabela, então sempre que for inserir dados no banco dessa forma, organizar o array como se fosse a tabela no banco)
+            $test = array();
+            $test['name'] = 'Customer from array';
+            $test['address'] = 'Address from array';
+            $test['category_id'] = 1;
+            $test['city_id'] = 1;
+            $test['birthdate'] = date('Y-m-d');
+            
+	    // Cria um novo "Customer" e puxa dos dados do array "test[]", depois ele manda o banco guardar essas informações
+            $customer2 = new Customer;
+            $customer2->fromArray($test);
+            $customer2->store(); 
+            
+            TTransaction::close(); // closes transaction

@@ -1,0 +1,13 @@
+	    TTransaction::open('samples');
+            
+            // Puxa os "Customers" que tiverem id MAIOR que 1, e, bota um filtro para retornar os valores nos quais EXISTA um "F" no "gender no valor registrado no banco e o número "1990" no "birthdate" registrado no banco.
+            $list = Customer::where('id', '>', '1')->filter( function($object) {
+              return ( (strpos($object->gender, 'F') !== false)
+                   AND (strpos($object->birthdate, '1990') !== false) );
+            }, false); 
+                                 
+            foreach ($list as $customer)
+            {
+                echo $customer->id . ' - ' . $customer->name . ' - ' . $customer->address. '<br>';
+            }
+            TTransaction::close(); // fecha a transação.

@@ -1,0 +1,8 @@
+	    TTransaction::open('samples'); // Abre o banco "Samples"
+            $customer = new Customer(40); // Seleciona o "Customer" de id 40
+            $customer->delete(); // Deleta o "Customer" selecionado
+            
+            $customer = new Customer;
+            $customer->delete(41); // Deleta o "Customer" criado logo acima 
+            new TMessage('info', 'Object deleted'); 
+            TTransaction::close();

@@ -1,0 +1,16 @@
+--Adianti--
+
+Coisas que eu tenho que aprender para poder entender mais facilmente as coisas que estão na minha tela
+
+* TABLENAME define o nome da tabela que a classe de modelo irá manipular.
+* PRIMARYKEY define o campo de chave primária. O framework não manipula chaves compostas.
+* IDPOLICY define a estratégia para geração de novos ID's. max+1 ou serial (deixa o campo de chave primária vazio e o banco de dados decide seu novo valor). 
+
+
+\\Codificação
+
+* Product::all() vai puxar todos os registros que estiverem cadastrados
+
+* Product::where('age', '>', '18')->count(); vai procurar dentro dos registros existentes de Produtos em que o ATRIBUTO "age" vai estar MAIOR que 18 e vai CONTAR quantos registros o programa vai retornar
+* addAttribute('name'); vai adicionar o atributo à tabela
+

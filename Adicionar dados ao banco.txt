@@ -1,0 +1,31 @@
+	    TTransaction::open('samples'); // abre o banco de samples
+            
+            // Cria um novo "Customer"
+            $giovani = new Customer; 
+            $giovani->name        = 'Giovanni Dall Oglio'; 
+            $giovani->address     = 'Rua da Conceicao'; 
+            $giovani->phone       = '(51) 8111-2222'; 
+            $giovani->birthdate   = '2013-02-15'; 
+            $giovani->status      = 'S'; 
+            $giovani->email       = 'giovanni@dalloglio.net'; 
+            $giovani->gender      = 'M'; 
+            $giovani->category_id = '1'; 
+            $giovani->city_id     = '1'; 
+            $giovani->store(); // Cada linha de código dessas com o nome dos atributos vai definir o atributo que vai ser inserido no novo "Customer" e o "store()" vai armazenar tudo dentro do novo "Customer" que foi criado
+            
+            new TMessage('info', 'Object stored successfully'); //	vai imprimir uma mensagem "info" sinalizando que o objeto "Customer" foi inserido com suscesso 
+            TTransaction::close(); // Closes the transaction 
+
+
+
+
+
+	    Customer::create( [ 'name' => 'Antonio Dall Oglio',
+                                'address' => 'Rua da Conceicao',
+                                'phone' => '(51) 8111-2222',
+                                'birthdate' => '2013-02-15',
+                                'status' => 'S',
+                                'email' => 'antonio@dalloglio.net',
+                                'gender' => 'M',
+                                'category_id' => '1',
+                                'city_id' => '1' ]); //		Este é outro método de inserir dados no banco, é a mesma coisa.

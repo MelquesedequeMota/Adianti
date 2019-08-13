@@ -1,0 +1,52 @@
+	    TTransaction::open('samples');
+
+	    // Cria um filtro com as requisições designadas logo abaixo
+
+            $criteria = new TCriteria; 
+            $criteria->add(new TFilter('name', 'like', 'Rafael%'),
+                                         TExpression::OR_OPERATOR); 
+            $criteria->add(new TFilter('name', 'like', 'Ana%'),
+                                         TExpression::OR_OPERATOR);
+
+
+	    // Cria um repositório de "Customer" e conta quantos valores o programa conseguiu puxar.
+            
+            $repository = new TRepository('Customer'); 
+            $count = $repository->count($criteria); 
+            
+	    //Imprimie o total de "Customers" que o programa encontrou
+ 
+            new TMessage('info', "Total of found customers: {$count} <br>\n"); 
+            TTransaction::close();
+
+
+
+
+
+
+	    TTransaction::open('samples');
+            
+            // Cria um filtro com as requisições designadas logo abaixo e logo após conta quantos registros o programa puxou
+            $count = Customer::where('gender', '=', 'M')
+                             ->where('name', 'like', 'A%')
+                             ->count();
+                                 
+            print( $count ); // Conta quantos valores o programa conseguiu puxar.
+            TTransaction::close();
+
+
+
+
+
+
+	    TTransaction::open('samples');
+
+	    // Cria um filtro com as requisições designadas logo abaixo e logo após conta quantos registros o programa puxou
+
+            $criteria = new TCriteria;
+            $criteria->add( new TFilter( 'gender', '=', 'M' ));
+            $criteria->add( new TFilter( 'name', 'like', 'A%' ));
+            
+            print( Customer::countObjects($criteria) ); // Conta a quantidade de objetos que foram puxados com o "countObjects()"
+            
+            TTransaction::close();

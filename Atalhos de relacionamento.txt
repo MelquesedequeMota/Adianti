@@ -1,0 +1,38 @@
+	    TTransaction::open('samples'); // abre uma transação
+            
+            // Puxa o "Customer" de id 1 e puxa todos os "contact" que ele possui [hasMany() pra quando é um relacionamento onde ele pode possuir mais de 1 	    item relacionado a ele e o hasOne() é pra quando somente 1 pode estar relacionado a ele]
+            $contacts = Customer::find(1)
+                                ->hasMany('Contact');
+            var_dump($contacts);
+            
+            // Puxa o "Customer" de id 1 e puxa todos os "contact" que ele possui e especifica as informações que ele quer que sejam puxadas.
+            $contacts = Customer::find(1)
+                                ->hasMany('Contact', 'customer_id', 'id', 'type');
+            var_dump($contacts);
+                        
+            // Puxa o "Customer" de id 1 e puxa todos os "contact" que ele possui de acordo com as informações requisitadas
+            $contacts = Customer::find(1)
+                                ->filterMany('Contact')
+                                ->where('type', '=', 'MSN')
+                                ->load();
+            var_dump($contacts);
+            
+            // Puxa o "Customer" de id 1 e puxa todos os "contact" que ele possui e especifica as informações que ele quer que sejam puxadas de acordo com 	    as informações requisitadas.
+            $contacts = Customer::find(1)
+                                ->filterMany('Contact', 'customer_id', 'id', 'type')
+                                ->where('type', '=', 'MSN')
+                                ->load();
+            var_dump($contacts);
+            
+            // Puxa o "Customer" de id 1 e puxa todos os "skill" ao qual ele pertence
+            $skills = Customer::find(1)
+                              ->belongsToMany('Skill');
+            var_dump($skills);
+            
+            // Puxa o "Customer" de id 1 e puxa todos os "skill" ao qual ele pertence e especifica as informações que ele quer que sejam puxadas.
+            $skills = Customer::find(1)
+                              ->belongsToMany('Skill', 'CustomerSkill',
+                                              'customer_id', 'skill_id');
+            var_dump($skills);
+            
+            TTransaction::close(); // fecha a transação.

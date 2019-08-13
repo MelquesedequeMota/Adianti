@@ -1,0 +1,40 @@
+	    TTransaction::open('samples');
+            $criteria = new TCriteria;
+
+            // Buscar dados do banco onde:
+	    //1°: Limit -> vai puxar apenas 10 registros, caso houver mais de 10
+	    //2°: Offset -> vai começar a puxar do vigésimo que ele conseguir, ou seja, caso ele consiga puxar 50 registros, ele imprime do 20 ao 30, e não 	    do 1 ao 10
+	    //3°: Order -> ele vai ordenar os registros que ele puxou de acordo com a id em ordem crescente (ASC)
+            $criteria->setProperty('limit' , 10);
+            $criteria->setProperty('offset', 20);
+            $criteria->setProperty('order' , 'id');
+            
+            $repository = new TRepository('Customer');
+            $customers = $repository->load($criteria); // Caregando os "Customers" que tiverem esses requisitos
+            
+            foreach ($customers as $customer)
+            {
+                echo $customer->id . ' - ' . $customer->name . '<br>'; // Imprimindo os dados dos "customers" que tiveram esses requisitos
+            }
+            TTransaction::close(); // close transaction
+
+
+
+
+	    TTransaction::open('samples'); // open transaction
+            
+            // load odered by id, limit 10 offset 20
+            $customers = Customer::orderBy('id')->take(10)->skip(20)->load(); // Buscando os regitros dos "Customers" que tiverem os mesmos requisitos que o 	    código acima
+
+            if ($customers)
+            {
+                foreach ($customers as $customer) 
+                { 
+                    echo $customer->id . ' - ' . $customer->name . '<br>'; 
+                }
+            }
+            
+            // Pegando o primeiro registro desses e transformando em array
+            var_dump( Customer::orderBy('id')->first()->toArray() );
+             
+            TTransaction::close(); // close transaction

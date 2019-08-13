@@ -1,0 +1,13 @@
+	    TTransaction::open('samples'); // open transaction 
+            // Cria o logger e define o caminho do logger, depois insere dentro do log uma mensagem indicando que está inserindo uma cidade no banco
+            TTransaction::setLogger(new TLoggerTXT('/tmp/log.txt')); 
+            TTransaction::log("** inserting city"); 
+            
+            $cidade = new City; // create new object 
+            $cidade->name = 'Porto Alegre';
+            $cidade->state_id = '1'; 
+            $cidade->store(); // store the object
+            
+            new TMessage('info', 'Object stored successfully'); 
+            TTransaction::close(); // close transaction
+ 

@@ -1,0 +1,14 @@
+	    TTransaction::open('samples'); // vai me permitir com que a gente consiga acessar o banco "samples", é assim que eu vou puxar o banco para poder usar ele
+
+            $conn = TTransaction::get(); // faz a conexão com o banco e guardando dentro da variável "conn"
+            
+            
+            $result = $conn->query('SELECT id, name from customer order by id');	// ta guardando dentro da variável "result" a query de selecionar o id e o nome da tabela "customer"
+            
+            // foreach que vai pegar os dados que foram puxados do anco e mostra eles
+            foreach ($result as $row) 
+            { 
+                print $row['id'] . '-'; 
+                print $row['name'] . "<br>\n"; 
+            } 
+            TTransaction::close();	// fecha a conexão do banco

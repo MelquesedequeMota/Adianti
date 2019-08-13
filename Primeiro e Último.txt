@@ -1,0 +1,9 @@
+	    TTransaction::open('samples'); // Abre o "Samples"
+            
+            $first = Customer::first(); // Selecionando o PRIMEIRO "Customer" que está dentro do banco e logo abaixo imprime os dados dele
+            print 'First ID:   ' . $first->id;
+            print 'First Name: ' . $first->name;
+            
+            $last  = Customer::last(); // Selecionando o ÚLTIMO "Customer" que está dentro do banco e logo abaixo imprime os dados dele
+            print 'Last ID:   ' . $last->id;
+            print 'Last Name: ' . $last->name;
