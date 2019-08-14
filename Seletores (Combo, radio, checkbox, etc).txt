@@ -1,0 +1,398 @@
+					Seletores Estáticos
+
+<?php
+/**
+ * FormStaticSelectionView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormStaticSelectionView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // create the form
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle(_t('Static selections'));
+        
+        // Cria os tipos de input que serão detalhados logo abaixo
+        $radio    = new TRadioGroup('radio'); // Input radio normal
+        $radio2   = new TRadioGroup('radio2'); // Input radio em forma de botão
+        $check    = new TCheckGroup('check'); // Input checkbox normal 
+        $check2   = new TCheckGroup('check2'); // Input checkbox em forma de botão
+        $combo    = new TCombo('combo'); // Input combo normal
+        $combo2   = new TCombo('combo2');  // Input combo com pesquisa
+        $select   = new TSelect('select');  // Input select normal
+        $search   = new TMultiSearch('search');  // Input onde vc digita o nome parecido e já aparece para vc selecionar (tipo quando vc vai marcar um amigo no facebook em alguma publicação)
+        $unique   = new TUniqueSearch('unique'); // Mesma coisa que o de cima só que em vez de poder procurar e marcar vários, somente 1 pode ser fixado
+        $multi    = new TMultiEntry('multi'); // Mesma coisa que o TMultiSearch, porém não tem pesquisa, os selecionáveis vão aparecer para você escolher
+        $autocomp = new TEntry('autocomplete'); // Input text normal
+        
+         // Definindo que a divisão das opções vai ser na horizontal (direota para esquerda)
+        $radio->setLayout('horizontal');
+        $radio2->setLayout('horizontal'); 
+        $check->setLayout('horizontal');
+        $check2->setLayout('horizontal');
+
+        // Definindo que o "radio2" e o "check2" vão ser utilizados em forma de botões, e não da maneira convencional
+        $radio2->setUseButton();
+        $check2->setUseButton();
+
+         // Definindo que o "combo2" vai ter um input para pesquisa dentro dele
+        $combo2->enableSearch();
+
+         // Definindo o tamanho mínimo de letras nescessárias para a pesquisa funcionar
+        $search->setMinLength(1);
+        $unique->setMinLength(1);
+
+        // Definindo o tamanho máximo de opções que podem ser escolhidas
+        $search->setMaxSize(3);
+        $multi->setMaxSize(3);
+
+        // Definindo o conteúdo de todas as inputs
+        $items = ['a'=>'Item a', 'b'=>'Item b', 'c'=>'Item c'];
+        $radio->addItems($items);
+        $check->addItems($items);
+        $radio2->addItems($items);
+        $check2->addItems($items);
+        $combo->addItems($items);
+        $combo2->addItems($items);
+        $select->addItems($items);
+        $search->addItems($items);
+        $unique->addItems($items);
+        $autocomp->setCompletion( array_values( $items ));
+
+        // Fazendo os pop-ins que aparecem quando a gente passa o mouse em cima dos botões
+        foreach ($radio2->getLabels() as $key => $label)
+        {
+            $label->setTip("Radio $key");
+        }
+        foreach ($check2->getLabels() as $key => $label)
+        {
+            $label->setTip("Check $key");
+        }
+        
+        // Define os valores iniciais contidos em cada um dos inputs
+        $radio->setValue('b');
+        $radio2->setValue('b');
+        $check->setValue( array('a', 'c'));
+        $check2->setValue( array('a', 'c'));
+        $combo->setValue('b');
+        $combo2->setValue('b');
+        $select->setValue(array('a', 'b'));
+        $search->setValue(array('a', 'c'));
+        $unique->setValue(array('b'));
+        $multi->setValue(array('aaa','bbb'));
+        $select->setSize('100%',100);
+        $search->setSize('100%',70);
+        $multi->setSize('100%');
+        
+        // Faz a parte que vai aparecer todo o conteúdo da página
+        $this->form->setColumnClasses(2, ['col-sm-4', 'col-sm-8']);
+        
+        $this->form->addFields( [new TLabel('TRadioGroup:')],  [$radio] );
+        $this->form->addFields( [new TLabel('TCheckGroup:')],  [$check] );
+        $this->form->addFields( [new TLabel('TRadioGroup (use button):')], [$radio2] );
+        $this->form->addFields( [new TLabel('TCheckGroup (use button):')], [$check2] );
+        $this->form->addFields( [new TLabel('TCombo:')],      [$combo] );
+        $this->form->addFields( [new TLabel('TCombo (with search):')], [$combo2] );
+        $this->form->addFields( [new TLabel('TSelect:')],      [$select] );
+        $this->form->addFields( [new TLabel('TMultiSearch:')], [$search] );
+        $this->form->addFields( [new TLabel('TUniqueSearch:')],[$unique] );
+        $this->form->addFields( [new TLabel('TMultiEntry:')],  [$multi] );
+        $this->form->addFields( [new TLabel('Autocomplete:')], [$autocomp] );
+        
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green');
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Send data
+     */
+    public function onSend($param)
+    {
+        $data = $this->form->getData(); // Pega as informações do formulário
+        
+        // Bota de volta as informações do formulário
+        $this->form->setData($data);
+        
+        // Cria uma string com a mensagem de tudo que tem no formulário
+        $message = 'Radio : ' . $data->radio . '<br>';
+        $message.= 'Check : ' . print_r($data->check, TRUE) . '<br>';
+        $message.= 'Radio (button) : ' . $data->radio2 . '<br>';
+        $message.= 'Check (button) : ' . print_r($data->check2, TRUE) . '<br>';
+        $message.= 'Combo : ' . $data->combo . '<br>';
+        $message.= 'Combo2 : '. $data->combo2 . '<br>';
+        $message.= 'Select: ' . print_r($data->select, TRUE) . '<br>';
+        $message.= 'Search: ' . print_r($data->search, TRUE) . '<br>';
+        $message.= 'Unique: '. print_r($data->unique, TRUE) . '<br>';
+        $message.= 'Multi: ' . print_r($data->multi, TRUE) . '<br>';
+        $message.= 'Autocomplete: ' . $data->autocomplete;
+        
+        // Mostra a mensagem
+        new TMessage('info', $message);
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------
+					Seletores puxando dados do banco
+
+
+<?php
+/**
+ * FormDBManualSelectionView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormDBManualSelectionView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // create the form
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle(_t('Manual database selections'));
+        
+        // Criando os campos do formulário
+        $radio    = new TRadioGroup('radio');
+        $check    = new TCheckGroup('check');
+        $combo    = new TCombo('combo');
+        $select   = new TSelect('select');
+        $search   = new TMultiSearch('search');
+        $autocomp = new TEntry('autocomplete');
+
+        // Propriedades dos campos do formulário
+        $search->setMinLength(1);
+        $radio->setLayout('horizontal');
+        $check->setLayout('horizontal');
+        
+        // Abre o banco de dados "samples"
+        TTransaction::open('samples');
+
+        // Carrega todos os itens da "Category"(categoria) diretamente do banco
+        $collection = Category::all();
+        
+        // Cria uma array que vai armazenar todos os dados que foram puxados do banco (EX: $items[1] = Frequente)
+        $items = array();
+        foreach ($collection as $object)
+        {
+            $items[$object->id] = $object->name;
+        }
+        TTransaction::close();
+        
+        // Adiciona os dados contidos no array dentro dos seletores
+        $radio->addItems($items);
+        $check->addItems($items);
+        $combo->addItems($items);
+        $select->addItems($items);
+        $search->addItems($items);
+        $autocomp->setCompletion( array_values( $items ));
+        
+        // Ajusta as configurações de visualização e monta a página visível
+        $this->form->setColumnClasses(2, ['col-sm-4', 'col-sm-8']);
+        
+        $this->form->addFields( [new TLabel('TRadioGroup:')],  [$radio] );
+        $this->form->addFields( [new TLabel('TCheckGroup:')],  [$check] );
+        $this->form->addFields( [new TLabel('TCombo:')],       [$combo] );
+        $this->form->addFields( [new TLabel('TSelect:')],      [$select] );
+        $this->form->addFields( [new TLabel('TMultiSearch (minlen 1):')], [$search] );
+        $this->form->addFields( [new TLabel('Autocomplete:')], [$autocomp] );
+        
+        $select->setSize('100%', 70);
+        $search->setSize('100%', 50);
+        
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green');
+        
+        
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Send data
+     */
+    public function onSend($param)
+    {
+        $data = $this->form->getData(); 
+        
+        
+        $this->form->setData($data);
+        
+        
+        $message = 'Radio : ' . $data->radio . '<br>';
+        $message.= 'Check : ' . print_r($data->check, TRUE) . '<br>';
+        $message.= 'Combo : ' . $data->combo . '<br>';
+        $message.= 'Select : ' . print_r($data->select, TRUE) . '<br>';
+        $message.= 'MultiSearch: ' . print_r($data->search, TRUE) . '<br>';
+        $message.= 'Autocomplete: ' . $data->autocomplete;
+        
+       
+        new TMessage('info', $message);
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------
+					Seletores puxando dados do banco
+
+<?php
+/**
+ * FormDBAutoSelectionView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormDBAutoSelectionView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // create the form
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle(_t('Automatic database selections'));
+        
+        // Cria os campos do formulário com dados puxados DIRETAMENTE DO BANCO
+        // Ordem de organização: (nome, banco, modelo(tabela), id, valor(atributo))
+        $radio    = new TDBRadioGroup('radio', 'samples', 'Category', 'id', 'name');
+        $radio2   = new TDBRadioGroup('radio2','samples', 'Category', 'id', '{id} - {name}');
+        $check    = new TDBCheckGroup('check', 'samples', 'Category', 'id', 'name');
+        $check2   = new TDBCheckGroup('check2','samples', 'Category', 'id', '{id} - {name}');
+        $combo    = new TDBCombo('combo', 'samples', 'Category', 'id', 'name');
+        $combo2   = new TDBCombo('combo2', 'samples', 'Category', 'id', 'name');
+        $select   = new TDBSelect('select', 'samples', 'Category', 'id', 'name');
+        $search   = new TDBMultiSearch('search', 'samples', 'Category', 'id', 'name');
+        $unique   = new TDBUniqueSearch('unique', 'samples', 'City', 'id', 'name');
+        $autocomp = new TDBEntry('autocomplete', 'samples', 'Category', 'name');
+        
+        // Ajusta as configurações de visualização e monta a página visível
+        $this->form->setColumnClasses(2, ['col-sm-4', 'col-sm-8']);
+
+        $this->form->addFields( [new TLabel('TDBRadioGroup:')],  [$radio] );
+        $this->form->addFields( [new TLabel('TDBCheckGroup:')],  [$check] );
+        $this->form->addFields( [new TLabel('TDBRadioGroup (use button):')],  [$radio2] );
+        $this->form->addFields( [new TLabel('TDBCheckGroup (use button):')],  [$check2] );
+        $this->form->addFields( [new TLabel('TDBCombo:')],       [$combo] );
+        $this->form->addFields( [new TLabel('TDBCombo (with search):')],   [$combo2] );
+        $this->form->addFields( [new TLabel('TDBSelect:')],      [$select] );
+        $this->form->addFields( [new TLabel('TDBMultiSearch:')], [$search] );
+        $this->form->addFields( [new TLabel('TDBUniqueSearch:')],[$unique] );
+        $this->form->addFields( [new TLabel('TDBEntry:')], [$autocomp] );
+        
+        $search->setMinLength(1);
+        $unique->setMinLength(1);
+        
+        // Cria as máscaras de como vai aparecer dentro dos seletores de pesquisa
+        $search->setMask('{name} ({id})');
+        $unique->setMask('({id}) <b>{name}</b> - {state->name}');
+        $search->setOperator('like');
+        
+        // Define o valor inicial dos campos
+        $radio->setValue(2);
+        $radio2->setValue(2);
+        $check->setValue(array(1,3));
+        $check2->setValue(array(1,3));
+        $combo->setValue(2);
+        $combo2->setValue(2);
+        $select->setValue(array(1,2));
+        $search->setValue(array(1,2));
+        $unique->setValue(2);
+        
+        // Propriedades do resto dos seletores
+        $radio->setLayout('horizontal');
+        $check->setLayout('horizontal');
+        $radio2->setLayout('horizontal');
+        $check2->setLayout('horizontal');
+        $radio2->setUseButton();
+        $check2->setUseButton();
+        $combo->setSize('100%');
+        $combo2->setSize('100%');
+        $combo2->enableSearch();
+        $select->setSize('100%',100);
+        $search->setSize('100%',70);
+        $unique->setSize('100%');
+        $autocomp->setSize('100%');
+        
+        $this->form->addAction('Send', new TAction(array($this, 'onSend')), 'fa:check-circle-o green');
+        
+        
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Send data
+     */
+    public function onSend($param)
+    {
+        $data = $this->form->getData(); 
+        
+        
+        $this->form->setData($data);
+        
+        
+        $message = 'Radio : ' . $data->radio . '<br>';
+        $message.= 'Check : ' . print_r($data->check, TRUE) . '<br>';
+        $message.= 'Radio (button) : ' . $data->radio2 . '<br>';
+        $message.= 'Check (button) : ' . print_r($data->check2, TRUE) . '<br>';
+        $message.= 'Combo : ' . $data->combo . '<br>';
+        $message.= 'Combo2 : ' . $data->combo2 . '<br>';
+        $message.= 'Select : ' . print_r($data->select, TRUE) . '<br>';
+        $message.= 'Search : ' . print_r($data->search, TRUE) . '<br>';
+        $message.= 'Unique: '. print_r($data->unique, TRUE) . '<br>';
+        $message.= 'Autocomplete: ' . $data->autocomplete;
+        
+
+        new TMessage('info', $message);
+    }
+}

@@ -1,0 +1,105 @@
+<?php
+/**
+ * FormSeekButtonView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormSeekButtonView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // Cria o formulário
+        $this->form = new BootstrapFormBuilder('form_seek');
+        $this->form->setFormTitle(_t('Seek button'));
+        
+        // Busca os dados do banco de acordo com as cidades que já estão cadastradas
+        $city_id   = new TDBSeekButton('city_id', 'samples', 'form_seek', 'City', 'name');
+        $city_name = new TEntry('city_name');
+        $city_id->setAuxiliar($city_name); //setAuxilar() irá servir para armazenar os dados que puxamos do banco dentro do input "city_name"
+        
+        // Cria um novo critério para buscar apenas os registros que tiverem o id que começa no 1 e termina no 10 e ordena em ASC
+        $criteria = new TCriteria;
+        $criteria->add(new TFilter('id', '>=', 1));
+        $criteria->add(new TFilter('id', '<=', 10));
+        $criteria->setProperty('order', 'id');
+        
+        // Busca os dados do banco de acordo com os produtos que já estão cadastrados e adiciona os critérios criados logo acima
+        $product_id   = new TDBSeekButton('product_id', 'samples', 'form_seek', 'Product', 'description');
+        $product_name = new TEntry('product_name');
+        $product_id->setCriteria($criteria);
+        $product_id->setAuxiliar($product_name);
+        
+        // Busca os dados do banco de acordo com os clientes já cadastrados e adiciona máscaras para visualização
+        $customer_id   = new TDBSeekButton('customer_id', 'samples', 'form_seek', 'Customer', 'name');
+        $customer_name = new TEntry('customer_name');
+        $customer_id->setDisplayMask('{name} - {city->name} - {city->state->name}');
+        $customer_id->setDisplayLabel('Informações do cliente');
+        $customer_id->setAuxiliar($customer_name);
+        
+        // Desabilita a edição dos campos que irão mostrar o que selecionamos
+        $city_name->setEditable(FALSE);
+        $product_name->setEditable(FALSE);
+        $customer_name->setEditable(FALSE);
+        
+        // Faz a visualização do formulário
+        $this->form->setColumnClasses(2, ['col-sm-3', 'col-sm-9']);
+
+        $this->form->addFields( [new TLabel('Standard Seek')],  [$city_id]);
+        $this->form->addFields( [new TLabel('Standard with filter')], [$product_id]);
+        $this->form->addFields( [new TLabel('Standard with mask')],   [$customer_id]);
+        
+        // Define as propriedades dos campos
+        $city_id->setSize(80);
+        $product_id->setSize(80);
+        $customer_id->setSize(80);
+        $city_name->setSize('calc(100% - 120px)');
+        $product_name->setSize('calc(100% - 120px)');
+        $customer_name->setSize('calc(100% - 120px)');
+        $city_name->style .= ';margin-left:3px';
+        $product_name->style .= ';margin-left:3px';
+        $customer_name->style .= ';margin-left:3px';
+        
+        $this->form->addAction('Save', new TAction(array($this, 'onSave')), 'fa:save');
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Simulates an save button
+     * Show the form content
+     */
+    public function onSave($param)
+    {
+        $data = $this->form->getData();
+        
+        
+        $this->form->setData($data);
+        
+        
+        $message = 'City id : '     . $data->city_id . '<br>';
+        $message.= 'Product id : '  . $data->product_id . '<br>';
+        $message.= 'Customer id : ' . $data->customer_id . '<br>';
+        
+      
+        new TMessage('info', $message);
+    }
+}

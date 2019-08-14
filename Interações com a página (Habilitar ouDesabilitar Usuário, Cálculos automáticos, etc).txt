@@ -1,0 +1,406 @@
+					Interações do lado cliente
+
+<?php
+/**
+ * FormClientInteractionsView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormClientInteractionsView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+
+        $this->form = new BootstrapFormBuilder('form_bmi');
+        $this->form->setFormTitle(_t('Client interactions'));
+        
+        // Cria os campos do formulário
+        $mass   = new TEntry('mass');
+        $height = new TEntry('height');
+        $result = new TEntry('result');
+        
+        $result->setEditable(FALSE); // Faz com que não possamos digitar nada dentro deste campo
+        
+        // Adiciona na parte visível na pagina
+        $this->form->addFields( [new TLabel('Mass (Kg)')],  [$mass] );
+        $this->form->addFields( [new TLabel('Height (m)')], [$height] );
+        $this->form->addFields( [new TLabel('Result')],     [$result] );
+        
+        // Definindo as ações das inputs (onBlur vai servir pra rodar a função abaixo quando o cliente retirar a seleção dos inputs)
+        $mass->onBlur   = 'calculate_bmi()';
+        $height->onBlur = 'calculate_bmi()';
+        
+        // Criando a função que vai fazer o cálculo automaticamente
+           TScript::create('calculate_bmi = function() {
+            if (document.form_bmi.mass.value > 0 && document.form_bmi.height.value > 0) 
+            {
+                form_bmi.result.value = parseFloat(form_bmi.mass.value) /
+                               Math.pow(parseFloat(form_bmi.height.value),2);
+            }
+        };');
+           // 1°: está checando se ambos os valores dos 2 formulários editáveis são maiores que 0 (document.(NomeDoFormulário).(NomeDoCampo).value)
+           //2°: Definindo o valor do campo "result" como a divisão entre a massa sobre o quadrado da altura (m/h²)  parseFloat() serve para transformar o número em um número flutuante (quebrado, xx.x) e o Math.pow() para fazer cálculos de exponenciação (Math.pow(Valor, Expoente)).
+
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------
+						Interações Dinâmicas
+
+<?php
+/**
+ * FormInteractionsView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormInteractionsView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // create the form
+        $this->form = new BootstrapFormBuilder('form_interaction');
+        $this->form->setFormTitle(_t('Dynamic interactions'));
+        
+        // Cria os campos do formulário
+        $input_exit   = new TEntry('input_exit');
+        $response_a   = new TEntry('response_a');
+        $combo_change = new TCombo('combo_change');
+        $response_b   = new TCombo('response_b');
+        $response_c   = new TEntry('response_c');
+        
+        // Define os registros que vão ficar dentro do "combo" e do "response b"
+        $combo_items = array();
+        $combo_items['a'] ='Item a';
+        $combo_items['b'] ='Item b';
+        $combo_items['c'] ='Item c';
+        
+        // Define propriedades dos campos e adiciona as opções nos combos
+        $response_a->setEditable(FALSE);
+        $response_c->setEditable(FALSE);
+        $combo_change->addItems($combo_items);
+        $response_b->addItems($combo_items);
+        
+        // Faz a parte que vai aparecer todo o conteúdo da página
+        $this->form->setColumnClasses(2, ['col-sm-4', 'col-sm-8']);
+        
+        $this->form->addFields( [new TLabel('Input with exit action')],    [$input_exit] );
+        $this->form->addFields( [new TLabel('Response A')], [$response_a] );
+        $this->form->addFields( [new TLabel('Combo with change action')], [$combo_change] );
+        $this->form->addFields( [new TLabel('Response B')], [$response_b] );
+        $this->form->addFields( [new TLabel('Response C')], [$response_c] );
+        
+        $this->form->addAction('View', new TAction(array($this, 'onView')), 'fa:search'); // Define a ação do formulário
+        
+        // Define a ação do "input_exit" (input text da pagina) de quando vc clicar fora do input, rodar a ação
+        $exit_action = new TAction(array($this, 'onExitAction'));
+        $input_exit->setExitAction($exit_action);
+        
+        // Define a ação do "combo_change"(primeiro combo da pagina) de que quando vc selecionar uma opção, automaticamente ja vai rodar uma ação
+        $change_action = new TAction(array($this, 'onChangeAction'));
+        $combo_change->setChangeAction($change_action);
+        
+
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Show data
+     */
+    public function onView()
+    {
+        // Pegando os dados do formulário
+        $data = $this->form->getData();
+        
+        // Envia os dados
+        $obj = new StdClass;
+        $obj->combo_change = $data->combo_change; // Vai ativar a ação de mudar o combo
+        $obj->response_b = $data->response_b;     // Vai mudar o valor depois da ação de mudar ser ativada
+        
+        // Envia os dados para o formulário
+        TForm::sendData('form_interaction', $obj);
+        
+        
+        $this->form->setData($data);
+        
+        new TMessage('info', str_replace(',', ',<br> ', json_encode($data)));
+    }
+    
+    /**
+     * Ação que vai ser executada quando o cliente ele sair do input
+     */
+    public static function onExitAction($param)
+    {
+        // Vai pegar a informação que tinha dentro do input text e vai imprimir dentro do "response_a"
+        $obj = new StdClass;
+        $obj->response_a = 'Resp. for '.$param['input_exit'].' at ' . date('H:m:s');
+        $obj->combo_change = 'a';
+        
+        TForm::sendData('form_interaction', $obj); // Vai enviar essas mudanças para o formulário "form_interaction"
+        new TMessage('info', 'Message on field exit. <br>You have typed: ' . $param['input_exit']);
+    }
+    
+    /**
+     * Ação que vai ser executada quando o usuário mudar o conteúdo do combo
+     */
+    public static function onChangeAction($param)
+    {
+        //Vai imprimir dentro do "responde_c" o combo que o usuário escolheu e mandar pro formulário de volta
+        $obj = new StdClass;
+        $obj->response_c = 'Resp. for opt "'.$param['combo_change'] . '" ' .date('H:m:s');
+        TForm::sendData('form_interaction', $obj);
+        
+        // Cria um array que vai redefinir o conteúdo que vai existir dentro do "responde_b" e vai RECARREGAR(reload()) as opções existentes nele de acordo com o combo que o cliente escolheu
+        $options = array();
+        $options[1] = $param['combo_change'] . ' - one';
+        $options[2] = $param['combo_change'] . ' - two';
+        $options[3] = $param['combo_change'] . ' - three';
+        TCombo::reload('form_interaction', 'response_b', $options);
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------
+					Habilitando/Desabilitando Formulário
+
+<?php
+/**
+ * FormEnableDisableView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormEnableDisableView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+
+        $this->form = new BootstrapFormBuilder('form_enable_disable');
+        $this->form->setFormTitle(_t('Enable/disable interactions'));
+        
+        // Cria 2 radios que serão usados para habilitar/desabilitar os campos
+        $radio_enable = new TRadioGroup('enable');
+        $radio_enable->addItems(array('1'=>'Enable group 1', '2'=>'Enable group 2'));
+        $radio_enable->setLayout('horizontal');
+        $radio_enable->setValue(1);
+        
+        // Cria os campos do formulario e define os conteudos e propriedades
+        $block1_combo   = new TCombo('block1_combo');
+        $block1_entry   = new TEntry('block1_entry');
+        $block1_spinner = new TSpinner('block1_spinner');
+        $block2_date    = new TDate('block2_date');
+        $block2_entry   = new TEntry('block2_entry');
+        $block2_check   = new TCheckGroup('block2_check');
+        
+        $block1_combo->addItems(array(1=>'One', 2=>'Two'));
+        $block1_spinner->setRange(1,100,10);
+        $block2_check->addItems(array('Y'=>'Yes', 'N'=>'No'));
+        
+        // Ajusta as configurações de visualização e monta a página visível
+        $this->form->setColumnClasses(2, ['col-sm-3', 'col-sm-9']);
+        
+        $this->form->addFields([],                       [$radio_enable] );
+        $this->form->addFields([new TLabel('group #1')], [$block1_combo] );
+        $this->form->addFields([],                       [$block1_entry] );
+        $this->form->addFields([],                       [$block1_spinner] );
+        $this->form->addFields([new TLabel('group #2')], [$block2_date] );
+        $this->form->addFields([],                       [$block2_entry] );
+        $this->form->addFields([],                       [$block2_check] );
+        
+        $radio_enable->setChangeAction( new TAction( array($this, 'onChangeRadio')) );
+        self::onChangeRadio( array('enable'=>1) ); // Vai definir a ação de mudar os campos habilitados
+
+
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Ação de mudar o Radio selecionado
+     * @param $param Action parameters
+     */
+    public static function onChangeRadio($param)
+    {
+        // Se o radio selecionado for o 1, mostrar o grupo 1
+        if ($param['enable'] == 1)
+        {
+            // Habilita os campos do grupo 1
+            TCombo::enableField('form_enable_disable', 'block1_combo');
+            TEntry::enableField('form_enable_disable', 'block1_entry');
+            TSpinner::enableField('form_enable_disable', 'block1_spinner');
+            
+            // Desabilita os campos do grupo 2
+            TDate::disableField('form_enable_disable', 'block2_date');
+            TEntry::disableField('form_enable_disable', 'block2_entry');
+            TCheckGroup::disableField('form_enable_disable', 'block2_check');
+            
+            // Limpa os campos do grupo 2
+            TDate::clearField('form_enable_disable', 'block2_date');
+            TEntry::clearField('form_enable_disable', 'block2_entry');
+            TCheckGroup::clearField('form_enable_disable', 'block2_check');
+        }
+        else
+        {
+            // Habilita os campos do grupo 2
+            TCombo::disableField('form_enable_disable', 'block1_combo');
+            TEntry::disableField('form_enable_disable', 'block1_entry');
+            TSpinner::disableField('form_enable_disable', 'block1_spinner');
+            
+            // Desabilita os campos do grupo 1
+            TDate::enableField('form_enable_disable', 'block2_date');
+            TEntry::enableField('form_enable_disable', 'block2_entry');
+            TCheckGroup::enableField('form_enable_disable', 'block2_check');
+            
+            // Limpa os campos do grupo 2
+            TCombo::clearField('form_enable_disable', 'block1_combo');
+            TEntry::clearField('form_enable_disable', 'block1_entry');
+            TSpinner::clearField('form_enable_disable', 'block1_spinner');
+        }
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+								Mostrando/Escondendo conteúdo da página
+
+<?php
+/**
+ * FormShowHideRowsView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class FormShowHideRowsView extends TPage
+{
+    private $form;
+    
+    /**
+     * Class constructor
+     * Creates the page
+     */
+    function __construct()
+    {
+        parent::__construct();
+        
+        // create the form
+        $this->form = new BootstrapFormBuilder('form_show_hide');
+        $this->form->setFormTitle(_t('Show/hide rows'));
+        
+        // Cria os campos do formulário
+        $type        = new TCombo('type');
+        $item_price  = new TEntry('item_price');
+        $units       = new TEntry('units');
+        $hour_price  = new TEntry('hour_price');
+        $hours       = new TEntry('hours');
+        
+        // Define a ação de quando mudar o conteúdo do combo, mudar o conteúdo da página automaticamente
+        $type->setChangeAction(new TAction(array($this, 'onChangeType')));
+        $combo_items = array();
+        $combo_items['p'] ='Product';
+        $combo_items['s'] ='Service';
+        $type->addItems($combo_items);
+        
+        // Define o valor padrão do combo
+        $type->setValue('p');
+        
+        // Ativa o evento assim que entra na página
+        self::onChangeType( ['type' => 'p'] );
+        
+        // Faz a visualização do formulário
+        $this->form->addFields( [new TLabel('Type')],       [$type] );
+        $this->form->addFields( [new TLabel('Item price')], [$item_price] );
+        $this->form->addFields( [new TLabel('Units')],      [$units] );
+        $this->form->addFields( [new TLabel('Hour price')], [$hour_price] );
+        $this->form->addFields( [new TLabel('Hours')],      [$hours] );
+        
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+
+        parent::add($vbox);
+    }
+    
+    /**
+     * Ação que irá ser executada quando trocarmos o conteúdo no combo
+     */
+    public static function onChangeType($param)
+    {
+        if ($param['type'] == 'p')
+        {
+            //Mostra os campos do formulário "form_show_hide" e diz qual o campo que vai aparecer
+            TQuickForm::showField('form_show_hide', 'item_price');
+            TQuickForm::showField('form_show_hide', 'units');
+
+            //Esconde os campos do formulário "form_show_hide" e diz qual o campo que vai desaparecer
+            TQuickForm::hideField('form_show_hide', 'hour_price');
+            TQuickForm::hideField('form_show_hide', 'hours');
+        }
+        else
+        {
+            //Esconde os campos do formulário "form_show_hide" e diz qual o campo que vai desaparecer
+            TQuickForm::hideField('form_show_hide', 'item_price');
+            TQuickForm::hideField('form_show_hide', 'units');
+
+            //Mostra os campos do formulário "form_show_hide" e diz qual o campo que vai aparecer
+            TQuickForm::showField('form_show_hide', 'hour_price');
+            TQuickForm::showField('form_show_hide', 'hours');
+        }
+    }
+}
