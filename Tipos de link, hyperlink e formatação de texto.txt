@@ -1,0 +1,61 @@
+<?php
+/**
+ * TextLinkView
+ *
+ * @version    1.0
+ * @package    samples
+ * @subpackage tutor
+ * @author     Pablo Dall'Oglio
+ * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
+ * @license    http://www.adianti.com.br/framework-license
+ */
+class TextLinkView extends TPage
+{
+    public function __construct()
+    {
+        parent::__construct();
+         
+        // Variável de ação que vai levar a gente pra página "CustomerFormView" quando clicarmos no action
+        $action = new TAction( ['CustomerFormView', 'onEdit' ] );
+        $action->setParameter('key', 2);
+        
+        $a = new TTextDisplay('Text Display', 'red', 12, 'bi'); // Input text (Nome do input -> cor -> Tamanho -> propriedades(b = bold, i = italic))
+
+        $a2 = new TTextDisplay(number_format(100, 2,',', '.'), 'red', 12, 'bi' ); // Input text convertido para Input do numero
+
+        $a3 = new TTextDisplay(TDate::convertToMask('2016-09-30', 'yyyy-mm-dd', 'dd/mm/yyyy'), 'red', 12, 'bi' ); // Input text convertido para o input date (Placeholder -> formato(com ano mês e dia) -> como vai aparecer apra o usuário)
+        
+        $b = new TActionLink('Action Link', $action, 'blue', 12, 'biu'); // <a></a> (Nome do link -> Ação que vai fazer -> Cor do texto -> Tamanho do texto -> Propriedades(b = bold, i = italic, u - underline))
+
+        // <a></a> com um íconezinho (fa:...) e pertencente a classe btn do bootstrap pra ficar bunito *-*
+        $b2 = new TActionLink('Action Link2', $action, 'white', 10, '', 'fa:check-square-o #FEFF00'); 
+        $b2->class='btn btn-success';
+        
+        // <a></a> que abre em uma nova aba para abrir um arquivo (nesse exemplo abre um pdf)
+        $c = new THyperLink('Hyper Link (file)', 'app/output/tabular.pdf', 'green', 12, 'biu');
+
+        // <a></a> que abre em uma nova aba
+        $c2 = new THyperLink('Hyper Link (url)', 'http://www.google.com', 'orange', 12, 'biu');
+
+        // <a></a> que abre em uma nova aba só que bunito
+        $c3 = new THyperLink('Hyper Link (url)', 'http://www.google.com', 'white', 10, '', 'fa:external-link white');
+        $c3->class='btn btn-info';
+        
+        // Envolve a página em uma caixa que via alinhas os inputs do formulário na vertical
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($a);
+        $vbox->add($a2);
+        $vbox->add($a3);
+        $vbox->add( new TElement('br') );
+        $vbox->add($b);
+        $vbox->add($b2);
+        $vbox->add( new TElement('br') );
+        $vbox->add($c);
+        $vbox->add($c2);
+        $vbox->add($c3); 
+        
+        parent::add( $vbox );
+    }
+}
